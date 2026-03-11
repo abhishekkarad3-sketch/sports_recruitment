@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}{{ player.name }} — Sports Talent Platform{% endblock %}
+
+{% block content %}
+
+<div class="profile-detail-header">
+  <div class="profile-detail-inner container">
+    <div class="profile-detail-avatar">{{ player.name[0].upper() }}</div>
+    <div class="profile-detail-info">
+      <div class="breadcrumb">
+        <a href="{{ url_for('players') }}">Players</a> / {{ player.name }}
+      </div>
+      <h1>{{ player.name }}</h1>
+      <p>
+        {{ player.sport }} &nbsp;·&nbsp;
+        <span class="badge badge-{{ (player.competition_level or 'District').lower() }}">{{ player.competition_level }}</span>
+      </p>
+    </div>
+    {% if session.get('role') == 'coach' and coach %}
+    <div style="margin-left:auto">
+      {% if already_recruited %}
+        <span class="badge badge-pending" style="font-size:14px;padding:8px 18px">📩 Request Pending</span>
+      {% else %}
+        <button class="btn btn-primary btn-lg"
+                onclick="openRecruitModal({{ player.player_id }}, '{{ player.name }}')"
+                data-i18n="player.recruit">Send Recruitment</button>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<main>
+<div class="container" style="max-width:900px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px" class="form-row">
+
+    <!-- Stats -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">📊 Stats</span></div>
+      <div class="card-body">
+        <div class="profile-info">
+          <div class="profile-info-row">
+            <span class="label">Sport</span>
+            <span class="value">{{ player.sport or '—' }}</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="label">Age</span>
+            <span class="value">{{ player.age or '—' }}</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="label">Height</span>
+            <span class="value">{{ player.height or '—' }} cm</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="label">Level</span>
+            <span class="value"><span class="badge badge-{{ (player.competition_level or 'District').lower() }}">{{ player.competition_level }}</span></span>
+          </div>
+          <div class="profile-info-row">
+            <span class="label">Contact</span>
+            <span class="value"><a href="mailto:{{ player.contact_email }}">{{ player.contact_email }}</a></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Achievements -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">🏅 Achievements</span></div>
+      <div class="card-body">
+        <p style="font-size:14px;line-height:1.8;color:var(--text)">
+          {{ player.achievements or 'No achievements listed.' }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback -->
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-header">
+      <span class="card-title">⭐ Feedback & Ratings</span>
+    </div>
+    <div class="card-body">
+      {% if feedbacks %}
+        {% for fb in feedbacks %}
+        <div class="request-card" style="margin-bottom:14px">
+          <div class="request-meta">
+            <span class="request-coach">👨‍🏫 {{ fb.coach_name }}</span>
+            <span class="stars-display">{{ '★' * fb.rating }}{{ '☆' * (5-fb.rating) }}</span>
+          </div>
+          <p style="font-size:14px;line-height:1.6;color:var(--text)">{{ fb.comment }}</p>
+          <span style="font-size:12px;color:var(--text-muted)">{{ fb.created_at.strftime('%d %b %Y') if fb.created_at else '' }}</span>
+        </div>
+        {% endfor %}
+      {% else %}
+      <div class="empty-state" style="padding:24px">
+        <div class="icon">⭐</div>
+        <p>No feedback yet for this player.</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Coach: Give feedback form -->
+  {% if session.get('role') == 'coach' and coach %}
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-header"><span class="card-title">💬 Give Feedback</span></div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('add_feedback') }}">
+        <input type="hidden" name="player_id" value="{{ player.player_id }}"/>
+        <div class="form-group">
+          <label class="form-label" data-i18n="coach.rating">Rating</label>
+          <div class="star-rating">
+            {% for i in range(5,0,-1) %}
+            <input type="radio" name="rating" id="star{{ i }}" value="{{ i }}" {% if loop.first %}required{% endif %}/>
+            <label for="star{{ i }}">★</label>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" data-i18n="coach.comment">Comment</label>
+          <textarea class="form-control" name="comment" placeholder="Share your assessment of this player…"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" data-i18n="coach.submitfeedback">Submit Feedback</button>
+      </form>
+    </div>
+  </div>
+  {% endif %}
+
+  <a href="{{ url_for('players') }}" class="btn btn-outline">← Back to Players</a>
+</div>
+</main>
+
+<!-- Recruitment Modal -->
+{% if session.get('role') == 'coach' and coach %}
+<div class="modal-overlay" id="recruitModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🎯 Send Recruitment Request</span>
+      <button class="modal-close" onclick="closeModal('recruitModal')">✕</button>
+    </div>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px">
+      To: <strong id="recruit_player_name">{{ player.name }}</strong>
+    </p>
+    <form method="POST" action="{{ url_for('send_recruitment') }}">
+      <input type="hidden" id="recruit_player_id" name="player_id" value="{{ player.player_id }}"/>
+      <div class="form-group">
+        <label class="form-label" data-i18n="coach.message">Message</label>
+        <textarea class="form-control" name="message" required
+                  placeholder="Write a personalized message…"></textarea>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="btn btn-primary" data-i18n="coach.send">Send Request</button>
+        <button type="button" class="btn btn-outline" onclick="closeModal('recruitModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

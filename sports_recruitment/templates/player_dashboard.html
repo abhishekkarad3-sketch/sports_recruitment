@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block title %}Player Dashboard — Sports Talent Platform{% endblock %}
+
+{% block content %}
+
+<!-- ── Dash Header ───────────────────────────────────────────── -->
+<div class="dash-header">
+  <div class="dash-header-inner">
+    <div class="dash-welcome">
+      <h2><span data-i18n="dash.welcome">Welcome back</span>, {{ session.name }}! 🏃</h2>
+      <p>Manage your sports profile and track recruitment requests.</p>
+    </div>
+    <div class="dash-actions">
+      {% if player %}
+        <a href="{{ url_for('register_player') }}" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.5)" data-i18n="dash.editprofile">Edit Profile</a>
+      {% else %}
+        <a href="{{ url_for('register_player') }}" class="btn btn-primary" data-i18n="dash.createprofile">Create Profile</a>
+      {% endif %}
+      <a href="{{ url_for('players') }}" class="btn btn-accent" data-i18n="nav.players">Browse Players</a>
+    </div>
+  </div>
+</div>
+
+<div class="dash-grid">
+
+  <!-- Sidebar -->
+  <aside class="dash-sidebar">
+    <div class="card">
+      <div class="card-body" style="text-align:center">
+        <div class="profile-avatar">{{ session.name[0].upper() }}</div>
+        <div class="profile-name">{{ session.name }}</div>
+        <div class="profile-role"><span class="badge badge-player">🏃 Player</span></div>
+
+        {% if player %}
+        <div class="profile-info" style="text-align:left;margin-top:16px">
+          <div class="profile-info-row">
+            <span class="label">Sport</span>
+            <span class="value">{{ player.sport or '—' }}</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="label">Age</span>
+            <span class="value">{{ player.age or '—' }}</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="label">Height</span>
+            <span class="value">{{ player.height or '—' }} cm</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="label">Level</span>
+            <span class="value">
+              <span class="badge badge-{{ (player.competition_level or 'District').lower() }}">
+                {{ player.competition_level or 'District' }}
+              </span>
+            </span>
+          </div>
+          <div class="profile-info-row">
+            <span class="label">Email</span>
+            <span class="value" style="font-size:12px">{{ player.contact_email or session.email }}</span>
+          </div>
+        </div>
+        {% else %}
+        <div class="empty-state" style="padding:20px 0">
+          <p style="font-size:14px;color:var(--text-muted)">No profile yet.</p>
+          <a href="{{ url_for('register_player') }}" class="btn btn-primary btn-sm mt-2">+ Create Profile</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="dash-main">
+    <div class="tabs-wrapper">
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="profile" data-i18n="dash.profile">My Profile</button>
+        <button class="tab-btn" data-tab="requests">
+          <span data-i18n="dash.requests">Recruitment Requests</span>
+          {% if requests %}<span style="background:var(--primary);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px">{{ requests|length }}</span>{% endif %}
+        </button>
+        <button class="tab-btn" data-tab="feedback" data-i18n="dash.feedback">Feedback Received</button>
+      </div>
+
+      <!-- Tab: Profile -->
+      <div class="tab-content active" data-tab-content="profile">
+        {% if player %}
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">🏅 Sports Profile</span>
+            <a href="{{ url_for('register_player') }}" class="btn btn-sm btn-outline" data-i18n="dash.editprofile">Edit Profile</a>
+          </div>
+          <div class="card-body">
+            <div class="form-row form-row-3" style="margin-bottom:20px">
+              <div class="pcs">
+                <div class="pcs-label">Sport</div>
+                <div class="pcs-val">{{ player.sport }}</div>
+              </div>
+              <div class="pcs">
+                <div class="pcs-label">Age</div>
+                <div class="pcs-val">{{ player.age }}</div>
+              </div>
+              <div class="pcs">
+                <div class="pcs-label">Height</div>
+                <div class="pcs-val">{{ player.height }} cm</div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Competition Level</label>
+              <span class="badge badge-{{ (player.competition_level or 'District').lower() }}" style="font-size:14px;padding:6px 16px">
+                🏆 {{ player.competition_level or 'District' }}
+              </span>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Achievements</label>
+              <div style="background:var(--bg2);border-radius:8px;padding:14px;font-size:14px;line-height:1.7;color:var(--text)">
+                {{ player.achievements or 'No achievements listed yet.' }}
+              </div>
+            </div>
+
+            <div style="display:flex;gap:8px;align-items:center">
+              <span style="font-size:13px;color:var(--text-muted)">Contact:</span>
+              <a href="mailto:{{ player.contact_email }}" style="font-size:14px">{{ player.contact_email }}</a>
+            </div>
+          </div>
+        </div>
+        {% else %}
+        <div class="empty-state card" style="padding:48px">
+          <div class="icon">🏃</div>
+          <h3>No Profile Yet</h3>
+          <p>Create your sports profile to get discovered by coaches.</p>
+          <a href="{{ url_for('register_player') }}" class="btn btn-primary mt-2" data-i18n="dash.createprofile">Create Profile</a>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Tab: Recruitment Requests -->
+      <div class="tab-content" data-tab-content="requests">
+        <h3 style="margin-bottom:20px;font-size:20px" data-i18n="dash.requests">Recruitment Requests</h3>
+        {% if requests %}
+          {% for req in requests %}
+          <div class="request-card">
+            <div class="request-meta">
+              <span class="request-coach">👨‍🏫 {{ req.coach_name }}</span>
+              <span class="badge badge-{{ req.status }}">{{ req.status.title() }}</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">
+              {{ req.sport_specialization }} · {{ req.date.strftime('%d %b %Y') if req.date else '' }}
+            </div>
+            <div class="request-msg">{{ req.message }}</div>
+            {% if req.status == 'pending' %}
+            <div class="request-actions">
+              <form method="POST" action="{{ url_for('update_recruitment') }}" style="display:inline">
+                <input type="hidden" name="recruit_id" value="{{ req.recruit_id }}"/>
+                <input type="hidden" name="status"     value="accepted"/>
+                <button type="submit" class="btn btn-sm btn-accent" data-i18n="status.accept">Accept</button>
+              </form>
+              <form method="POST" action="{{ url_for('update_recruitment') }}" style="display:inline">
+                <input type="hidden" name="recruit_id" value="{{ req.recruit_id }}"/>
+                <input type="hidden" name="status"     value="rejected"/>
+                <button type="submit" class="btn btn-sm btn-danger" data-i18n="status.reject">Reject</button>
+              </form>
+            </div>
+            {% endif %}
+          </div>
+          {% endfor %}
+        {% else %}
+        <div class="empty-state">
+          <div class="icon">📩</div>
+          <h3>No Requests Yet</h3>
+          <p>Recruitment requests from coaches will appear here.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Tab: Feedback -->
+      <div class="tab-content" data-tab-content="feedback">
+        <h3 style="margin-bottom:20px;font-size:20px" data-i18n="dash.feedback">Feedback Received</h3>
+        {% if feedbacks %}
+          {% for fb in feedbacks %}
+          <div class="request-card">
+            <div class="request-meta">
+              <span class="request-coach">👨‍🏫 {{ fb.coach_name }}</span>
+              <span class="stars-display">{{ '★' * fb.rating }}{{ '☆' * (5 - fb.rating) }}</span>
+            </div>
+            <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px">
+              {{ fb.created_at.strftime('%d %b %Y') if fb.created_at else '' }}
+            </div>
+            <p style="font-size:14px;line-height:1.6;color:var(--text)">{{ fb.comment }}</p>
+          </div>
+          {% endfor %}
+        {% else %}
+        <div class="empty-state">
+          <div class="icon">⭐</div>
+          <h3>No Feedback Yet</h3>
+          <p>Feedback from coaches will appear here.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+
+</div>
+
+{% endblock %}

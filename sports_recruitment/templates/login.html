@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Login — Sports Talent Platform{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="icon">🏆</div>
+      <h2 data-i18n="auth.login">Login to Your Account</h2>
+      <p>Welcome back! Pick your role to login.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('login') }}">
+
+      <!-- Role selector -->
+      <div class="form-group">
+        <label class="form-label" data-i18n="auth.role">I am a…</label>
+        <div class="role-selector">
+          <div class="role-option">
+            <input type="radio" name="role" id="rolePlayer" value="player" required checked/>
+            <label for="rolePlayer">
+              <span class="icon">🏃</span>
+              <span data-i18n="auth.player">Player</span>
+            </label>
+          </div>
+          <div class="role-option">
+            <input type="radio" name="role" id="roleCoach" value="coach" required/>
+            <label for="roleCoach">
+              <span class="icon">👨‍🏫</span>
+              <span data-i18n="auth.coach">Coach</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email" data-i18n="auth.email">Email Address</label>
+        <input class="form-control" type="email" id="email" name="email" required
+               placeholder="your@email.com" autocomplete="email"/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password" data-i18n="auth.password">Password</label>
+        <input class="form-control" type="password" id="password" name="password" required
+               placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+
+      <div style="text-align:right;margin-bottom:20px">
+        <a href="{{ url_for('forgot_password') }}" style="font-size:13px" data-i18n="auth.forgot">Forgot Password?</a>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg" data-i18n="auth.loginbtn">Login</button>
+    </form>
+
+    <div class="auth-footer">
+      <span data-i18n="auth.noacc">Don't have an account?</span>
+      <a href="{{ url_for('signup') }}" data-i18n="nav.signup"> Sign Up</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

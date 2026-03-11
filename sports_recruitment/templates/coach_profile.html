@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Coach Profile — Sports Talent Platform{% endblock %}
+
+{% block content %}
+
+<div class="page-title-bar">
+  <div class="page-title-bar-inner">
+    <div>
+      <div class="breadcrumb">
+        <a href="{{ url_for('coach_dashboard') }}">Dashboard</a> / My Profile
+      </div>
+      <h2>👨‍🏫 Coach Profile</h2>
+      <p>{% if coach %}Update{% else %}Setup{% endif %} your coach profile to start recruiting.</p>
+    </div>
+    <a href="{{ url_for('coach_dashboard') }}" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.4)">← Dashboard</a>
+  </div>
+</div>
+
+<main>
+<div class="container" style="max-width:760px">
+
+  <!-- Preview card -->
+  {% if coach %}
+  <div class="card" style="margin-bottom:24px">
+    <div class="card-body" style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+      <div class="profile-detail-avatar" style="width:72px;height:72px;font-size:28px;background:linear-gradient(135deg,var(--accent),var(--secondary))">
+        {{ session.name[0].upper() }}
+      </div>
+      <div>
+        <h3 style="font-size:20px">{{ session.name }}</h3>
+        <p style="color:var(--text-muted);margin-top:4px">{{ coach.sport_specialization }} · {{ coach.experience }} years experience</p>
+        <div style="margin-top:6px">
+          <span class="badge badge-coach">👨‍🏫 Coach</span>
+        </div>
+      </div>
+      <div style="margin-left:auto;text-align:right">
+        <a href="mailto:{{ coach.contact_email or session.email }}" style="font-size:13px">{{ coach.contact_email or session.email }}</a>
+      </div>
+    </div>
+    {% if coach.bio %}
+    <div style="padding:0 24px 20px;font-size:14px;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);padding-top:14px;margin-top:0">
+      {{ coach.bio }}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Edit Form -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">{% if coach %}✏️ Edit Profile{% else %}🆕 Create Profile{% endif %}</span>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('coach_profile') }}">
+
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="sport_specialization" data-i18n="coach.specialization">Sport Specialization</label>
+            <select class="form-control" id="sport_specialization" name="sport_specialization" required>
+              <option value="">Select sport…</option>
+              {% set sports = ['Cricket','Football','Hockey','Kabaddi','Kho-Kho','Wrestling','Boxing','Athletics','Badminton','Tennis','Volleyball','Basketball','Swimming','Archery','Weightlifting','Gymnastics','Cycling','Shooting','Judo','Taekwondo'] %}
+              {% for s in sports %}
+              <option value="{{ s }}" {% if coach and coach.sport_specialization==s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="experience" data-i18n="coach.experience">Experience (Years)</label>
+            <input class="form-control" type="number" id="experience" name="experience"
+                   min="0" max="60" value="{{ coach.experience if coach else 0 }}" placeholder="e.g. 10"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="contact_email">Contact Email</label>
+          <input class="form-control" type="email" id="contact_email" name="contact_email"
+                 value="{{ coach.contact_email if coach else session.email }}"
+                 placeholder="Public contact email"/>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="bio" data-i18n="coach.bio">About / Bio</label>
+          <textarea class="form-control" id="bio" name="bio" style="min-height:120px"
+                    placeholder="Tell players about your coaching background, achievements, and style…">{{ coach.bio if coach else '' }}</textarea>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <button type="submit" class="btn btn-primary btn-lg" data-i18n="coach.saveprofile">Save Profile</button>
+          <a href="{{ url_for('coach_dashboard') }}" class="btn btn-outline btn-lg">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+</main>
+
+{% endblock %}

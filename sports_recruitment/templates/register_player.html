@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}{% if player %}Edit{% else %}Create{% endif %} Player Profile — Sports Talent Platform{% endblock %}
+
+{% block content %}
+<div class="page-title-bar">
+  <div class="page-title-bar-inner">
+    <div>
+      <div class="breadcrumb">
+        <a href="{{ url_for('player_dashboard') }}">Dashboard</a> / Profile
+      </div>
+      <h2>{% if player %}✏️ Edit Profile{% else %}🏅 Create Profile{% endif %}</h2>
+    </div>
+    <a href="{{ url_for('player_dashboard') }}" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.4)">← Back</a>
+  </div>
+</div>
+
+<main>
+<div class="container-sm">
+  <div class="card">
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('register_player') }}">
+
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="sport" data-i18n="player.sport">Sport</label>
+            <select class="form-control" id="sport" name="sport" required>
+              <option value="">Select sport…</option>
+              {% set sports = ['Cricket','Football','Hockey','Kabaddi','Kho-Kho','Wrestling','Boxing','Athletics','Badminton','Tennis','Volleyball','Basketball','Swimming','Archery','Weightlifting','Gymnastics','Cycling','Shooting','Judo','Taekwondo'] %}
+              {% for s in sports %}
+              <option value="{{ s }}" {% if player and player.sport==s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="competition_level" data-i18n="player.level">Competition Level</label>
+            <select class="form-control" id="competition_level" name="competition_level">
+              <option value="District" {% if not player or player.competition_level=='District' %}selected{% endif %}>🏅 District</option>
+              <option value="State"    {% if player and player.competition_level=='State' %}selected{% endif %}>🥈 State</option>
+              <option value="National" {% if player and player.competition_level=='National' %}selected{% endif %}>🏆 National</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="age" data-i18n="player.age">Age</label>
+            <input class="form-control" type="number" id="age" name="age" min="8" max="60"
+                   value="{{ player.age if player else '' }}" required placeholder="e.g. 22"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="height" data-i18n="player.height">Height (cm)</label>
+            <input class="form-control" type="text" id="height" name="height"
+                   value="{{ player.height if player else '' }}" placeholder="e.g. 175"/>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="achievements" data-i18n="player.achievements">Achievements</label>
+          <textarea class="form-control" id="achievements" name="achievements"
+                    placeholder="e.g. District champion 2023, State-level gold medalist…">{{ player.achievements if player else '' }}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="contact_email">Contact Email</label>
+          <input class="form-control" type="email" id="contact_email" name="contact_email"
+                 value="{{ player.contact_email if player else session.email }}"
+                 placeholder="Public contact email"/>
+        </div>
+
+        <div style="display:flex;gap:10px">
+          <button type="submit" class="btn btn-primary btn-lg" data-i18n="coach.saveprofile">
+            {% if player %}Update Profile{% else %}Create Profile{% endif %}
+          </button>
+          <a href="{{ url_for('player_dashboard') }}" class="btn btn-outline btn-lg">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+</main>
+
+{% endblock %}

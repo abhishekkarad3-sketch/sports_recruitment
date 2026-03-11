@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Sports Talent Recruitment Platform{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ─────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-content container">
+    <div class="hero-eyebrow" data-i18n="hero.eyebrow">Rural Sports Talent Platform</div>
+    <h1>
+      <span data-i18n="hero.title1">Connecting</span>
+      <span data-i18n="hero.title2"> Talent</span>
+      <span data-i18n="hero.title3"> with</span>
+      <span class="text-primary" data-i18n="hero.title4"> Coaches</span>
+    </h1>
+    <p data-i18n="hero.subtitle">Empowering rural athletes to reach national-level recognition. Coaches discover the next champion — from any village.</p>
+    <div class="hero-actions">
+      {% if not session.get('user_id') %}
+        <a href="{{ url_for('signup') }}" class="btn btn-primary btn-lg" data-i18n="hero.btn1">Join as Player</a>
+        <a href="{{ url_for('signup') }}" class="btn btn-outline btn-lg" style="color:#fff;border-color:#fff" data-i18n="hero.btn2">I'm a Coach</a>
+      {% endif %}
+      <a href="{{ url_for('players') }}" class="btn btn-accent btn-lg" data-i18n="hero.btn3">Browse Players</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── Stats ─────────────────────────────────────────────────── -->
+<div class="stats-bar">
+  <div class="stats-bar-inner">
+    <div class="stat-item">
+      <div class="stat-num" data-target="{{ player_count }}">{{ player_count }}</div>
+      <div class="stat-label" data-i18n="stat.players">Players Registered</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="{{ coach_count }}">{{ coach_count }}</div>
+      <div class="stat-label" data-i18n="stat.coaches">Coaches</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" data-target="{{ recruit_count }}">{{ recruit_count }}</div>
+      <div class="stat-label" data-i18n="stat.recruits">Recruitments</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Features ──────────────────────────────────────────────── -->
+<section class="section" style="background:var(--bg)">
+  <div class="container">
+    <h2 class="section-title" data-i18n="feat.title">Everything You <span>Need</span></h2>
+    <p class="section-sub" data-i18n="feat.sub">A complete platform connecting rural sports talent with professional coaches.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🏅</div>
+        <h3 data-i18n="feat.p1.title">Player Profiles</h3>
+        <p data-i18n="feat.p1.desc">Build your sports resume with achievements, competition levels, and stats.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3 data-i18n="feat.p2.title">Coach Dashboard</h3>
+        <p data-i18n="feat.p2.desc">Search, filter and recruit players by sport, age, and competition level.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📩</div>
+        <h3 data-i18n="feat.p3.title">Recruitment System</h3>
+        <p data-i18n="feat.p3.desc">Send and track recruitment requests with real-time status updates.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⭐</div>
+        <h3 data-i18n="feat.p4.title">Ratings & Feedback</h3>
+        <p data-i18n="feat.p4.desc">Coaches can rate players and leave professional feedback.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✉️</div>
+        <h3 data-i18n="feat.p5.title">Email Verified</h3>
+        <p data-i18n="feat.p5.desc">Secure email verification and password reset via Gmail SMTP.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3 data-i18n="feat.p6.title">3 Languages</h3>
+        <p data-i18n="feat.p6.desc">Full support for English, Marathi and Hindi for rural athletes.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA ───────────────────────────────────────────────────── -->
+{% if not session.get('user_id') %}
+<section style="background:linear-gradient(135deg,var(--primary),#E55A0A);padding:60px 20px;text-align:center">
+  <h2 style="color:#fff;font-size:36px;margin-bottom:12px">Ready to Start Your Journey? 🚀</h2>
+  <p style="color:rgba(255,255,255,0.85);font-size:18px;margin-bottom:28px">Join thousands of athletes and coaches on the platform.</p>
+  <a href="{{ url_for('signup') }}" class="btn btn-lg" style="background:#fff;color:var(--primary);font-weight:700">Get Started Free</a>
+</section>
+{% endif %}
+
+{% endblock %}

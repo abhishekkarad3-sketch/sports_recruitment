@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+{% block title %}Coach Dashboard — Sports Talent Platform{% endblock %}
+
+{% block content %}
+
+<div class="dash-header">
+  <div class="dash-header-inner">
+    <div class="dash-welcome">
+      <h2><span data-i18n="dash.welcome">Welcome back</span>, {{ session.name }}! 👨‍🏫</h2>
+      <p>Search and recruit talented athletes from across the country.</p>
+    </div>
+    <div class="dash-actions">
+      <a href="{{ url_for('coach_profile') }}" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.5)" data-i18n="nav.profile">My Profile</a>
+      <a href="{{ url_for('players') }}" class="btn btn-primary" data-i18n="nav.players">Browse Players</a>
+    </div>
+  </div>
+</div>
+
+<div class="dash-grid">
+
+  <!-- Sidebar -->
+  <aside class="dash-sidebar">
+    <div class="card">
+      <div class="card-body" style="text-align:center">
+        <div class="profile-avatar">{{ session.name[0].upper() }}</div>
+        <div class="profile-name">{{ session.name }}</div>
+        <div class="profile-role mt-1"><span class="badge badge-coach">👨‍🏫 Coach</span></div>
+
+        {% if coach %}
+        <div class="profile-info" style="text-align:left;margin-top:16px">
+          <div class="profile-info-row">
+            <span class="label">Sport</span>
+            <span class="value">{{ coach.sport_specialization or '—' }}</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="label">Experience</span>
+            <span class="value">{{ coach.experience or 0 }} yrs</span>
+          </div>
+          <div class="profile-info-row">
+            <span class="label">Email</span>
+            <span class="value" style="font-size:12px">{{ coach.contact_email or session.email }}</span>
+          </div>
+        </div>
+        {% if coach.bio %}
+        <p style="font-size:13px;color:var(--text-muted);margin-top:14px;text-align:left;line-height:1.5">{{ coach.bio[:120] }}{% if coach.bio|length > 120 %}…{% endif %}</p>
+        {% endif %}
+        {% else %}
+        <div class="empty-state" style="padding:16px 0">
+          <p style="font-size:13px;color:var(--text-muted)">Profile incomplete.</p>
+          <a href="{{ url_for('coach_profile') }}" class="btn btn-primary btn-sm mt-2">+ Setup Profile</a>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Quick stats -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-body">
+        <h4 style="font-size:15px;margin-bottom:12px">📊 Quick Stats</h4>
+        <div class="profile-info-row">
+          <span class="label">Sent</span>
+          <span class="value" style="font-weight:700;color:var(--primary)">{{ sent_recruitments|length }}</span>
+        </div>
+        <div class="profile-info-row">
+          <span class="label">Accepted</span>
+          <span class="value" style="font-weight:700;color:var(--success)">{{ sent_recruitments | selectattr('status','eq','accepted') | list | length }}</span>
+        </div>
+        <div class="profile-info-row">
+          <span class="label">Pending</span>
+          <span class="value" style="font-weight:700;color:var(--warning)">{{ sent_recruitments | selectattr('status','eq','pending') | list | length }}</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="dash-main">
+    <div class="tabs-wrapper">
+      <div class="tab-nav">
+        <button class="tab-btn active" data-tab="search" data-i18n="dash.searchplayers">Search Players</button>
+        <button class="tab-btn" data-tab="sent">
+          <span data-i18n="dash.sentrequest">Sent Requests</span>
+          {% if sent_recruitments %}<span style="background:var(--primary);color:#fff;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px">{{ sent_recruitments|length }}</span>{% endif %}
+        </button>
+      </div>
+
+      <!-- Tab: Search Players -->
+      <div class="tab-content active" data-tab-content="search">
+        <!-- Filters -->
+        <form method="GET" action="{{ url_for('coach_dashboard') }}#search">
+        <div class="filter-bar">
+          <div class="form-group">
+            <label class="form-label">Search</label>
+            <input class="form-control" name="search" value="{{ srch }}" placeholder="Name or sport…"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="player.sport">Sport</label>
+            <select class="form-control" name="sport">
+              <option value="">All Sports</option>
+              {% for s in ['Cricket','Football','Hockey','Kabaddi','Kho-Kho','Wrestling','Boxing','Athletics','Badminton','Tennis','Volleyball','Basketball','Swimming','Archery','Weightlifting'] %}
+              <option value="{{ s }}" {% if sport_f==s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-i18n="player.level">Level</label>
+            <select class="form-control" name="level">
+              <option value="">All Levels</option>
+              <option value="District" {% if level_f=='District' %}selected{% endif %}>District</option>
+              <option value="State"    {% if level_f=='State'    %}selected{% endif %}>State</option>
+              <option value="National" {% if level_f=='National' %}selected{% endif %}>National</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Age</label>
+            <input class="form-control" type="number" name="age" value="{{ age_f }}" placeholder="e.g. 22" min="8" max="60"/>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-end;padding-bottom:1px">
+            <button type="submit" class="btn btn-primary">🔍</button>
+            <a href="{{ url_for('coach_dashboard') }}" class="btn btn-outline">✕</a>
+          </div>
+        </div>
+        </form>
+
+        {% if players %}
+        <div class="player-grid">
+          {% for p in players %}
+          <div class="player-card">
+            <div class="player-card-top">
+              <div class="player-card-avatar">{{ p.name[0].upper() }}</div>
+              <div>
+                <div class="player-card-name">{{ p.name }}</div>
+                <div class="player-card-sport">{{ p.sport or 'N/A' }}</div>
+              </div>
+              <div style="margin-left:auto">
+                <span class="badge badge-{{ (p.competition_level or 'District').lower() }}">{{ p.competition_level or 'District' }}</span>
+              </div>
+            </div>
+            <div class="player-card-body">
+              <div class="player-card-stats">
+                <div class="pcs">
+                  <div class="pcs-label">Age</div>
+                  <div class="pcs-val">{{ p.age or '—' }}</div>
+                </div>
+                <div class="pcs">
+                  <div class="pcs-label">Height</div>
+                  <div class="pcs-val">{{ p.height or '—' }} cm</div>
+                </div>
+              </div>
+              <div class="achievements-text">{{ p.achievements or 'No achievements.' }}</div>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <a href="{{ url_for('view_player', player_id=p.player_id) }}" class="btn btn-sm btn-secondary" data-i18n="player.viewprofile">View</a>
+                {% if coach %}
+                <button class="btn btn-sm btn-primary"
+                        onclick="openRecruitModal({{ p.player_id }},'{{ p.name }}')"
+                        data-i18n="player.recruit">Recruit</button>
+                <button class="btn btn-sm btn-outline"
+                        onclick="openFeedbackModal({{ p.player_id }},'{{ p.name }}')"
+                        data-i18n="player.feedback">Feedback</button>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <div class="icon">🔍</div>
+          <h3>No players found</h3>
+          <p>Try adjusting your filters.</p>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Tab: Sent Requests -->
+      <div class="tab-content" data-tab-content="sent">
+        <h3 style="margin-bottom:20px;font-size:20px" data-i18n="dash.sentrequest">Sent Requests</h3>
+        {% if sent_recruitments %}
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Sport</th>
+                <th>Level</th>
+                <th>Message</th>
+                <th>Date</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for r in sent_recruitments %}
+              <tr>
+                <td><a href="{{ url_for('view_player', player_id=r.player_id) }}" style="font-weight:700">{{ r.player_name }}</a></td>
+                <td>{{ r.sport }}</td>
+                <td><span class="badge badge-{{ (r.competition_level or 'district').lower() }}">{{ r.competition_level }}</span></td>
+                <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="{{ r.message }}">{{ r.message }}</td>
+                <td style="font-size:12px;color:var(--text-muted)">{{ r.date.strftime('%d %b %Y') if r.date else '' }}</td>
+                <td><span class="badge badge-{{ r.status }}">{{ r.status.title() }}</span></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+          <div class="icon">📩</div>
+          <h3>No requests sent yet</h3>
+          <p>Search for players and send recruitment requests.</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </main>
+
+</div>
+
+<!-- Recruitment Modal -->
+<div class="modal-overlay" id="recruitModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">🎯 Send Recruitment Request</span>
+      <button class="modal-close" onclick="closeModal('recruitModal')">✕</button>
+    </div>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px">
+      To: <strong id="recruit_player_name"></strong>
+    </p>
+    <form method="POST" action="{{ url_for('send_recruitment') }}">
+      <input type="hidden" id="recruit_player_id" name="player_id"/>
+      <div class="form-group">
+        <label class="form-label" data-i18n="coach.message">Recruitment Message</label>
+        <textarea class="form-control" name="message" required
+                  placeholder="Write a personalized recruitment message…"></textarea>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="btn btn-primary" data-i18n="coach.send">Send Request</button>
+        <button type="button" class="btn btn-outline" onclick="closeModal('recruitModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Feedback Modal -->
+<div class="modal-overlay" id="feedbackModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">⭐ Give Feedback</span>
+      <button class="modal-close" onclick="closeModal('feedbackModal')">✕</button>
+    </div>
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:20px">
+      For: <strong id="feedback_player_name"></strong>
+    </p>
+    <form method="POST" action="{{ url_for('add_feedback') }}">
+      <input type="hidden" id="feedback_player_id" name="player_id"/>
+      <div class="form-group">
+        <label class="form-label" data-i18n="coach.rating">Rating</label>
+        <div class="star-rating">
+          {% for i in range(5,0,-1) %}
+          <input type="radio" name="rating" id="mstar{{ i }}" value="{{ i }}" {% if loop.first %}required{% endif %}/>
+          <label for="mstar{{ i }}">★</label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" data-i18n="coach.comment">Comment</label>
+        <textarea class="form-control" name="comment" placeholder="Your assessment…"></textarea>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button type="submit" class="btn btn-primary" data-i18n="coach.submitfeedback">Submit</button>
+        <button type="button" class="btn btn-outline" onclick="closeModal('feedbackModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

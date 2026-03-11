@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Sign Up — Sports Talent Platform{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card" style="max-width:540px">
+    <div class="auth-logo">
+      <div class="icon">🏅</div>
+      <h2 data-i18n="auth.signup">Create Your Account</h2>
+      <p>Join the platform as a player or coach.</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('signup') }}">
+
+      <div class="form-group">
+        <label class="form-label" data-i18n="auth.role">I am a…</label>
+        <div class="role-selector">
+          <div class="role-option">
+            <input type="radio" name="role" id="rolePlayer" value="player" required checked/>
+            <label for="rolePlayer">
+              <span class="icon">🏃</span>
+              <span data-i18n="auth.player">Player</span>
+            </label>
+          </div>
+          <div class="role-option">
+            <input type="radio" name="role" id="roleCoach" value="coach" required/>
+            <label for="roleCoach">
+              <span class="icon">👨‍🏫</span>
+              <span data-i18n="auth.coach">Coach</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="name" data-i18n="auth.name">Full Name</label>
+        <input class="form-control" type="text" id="name" name="name" required
+               placeholder="Your full name" autocomplete="name"/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="email" data-i18n="auth.email">Email Address</label>
+        <input class="form-control" type="email" id="email" name="email" required
+               placeholder="your@email.com" autocomplete="email"/>
+        <p style="font-size:12px;color:var(--text-muted);margin-top:5px">
+          ⚠️ Each email can only be used for one role (player <strong>or</strong> coach).
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="password" data-i18n="auth.password">Password</label>
+        <input class="form-control" type="password" id="password" name="password" required
+               placeholder="Min. 6 characters" autocomplete="new-password"/>
+        <div style="margin-top:6px;height:4px;background:var(--border);border-radius:4px;overflow:hidden">
+          <div id="pwStrengthBar" style="height:100%;width:0;border-radius:4px;transition:width 0.3s,background 0.3s"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="confirm_password" data-i18n="auth.confirm">Confirm Password</label>
+        <input class="form-control" type="password" id="confirm_password" name="confirm_password" required
+               placeholder="Repeat password" autocomplete="new-password"/>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block btn-lg" data-i18n="auth.signupbtn">Create Account</button>
+    </form>
+
+    <div class="auth-footer">
+      <span data-i18n="auth.haveacc">Already have an account?</span>
+      <a href="{{ url_for('login') }}" data-i18n="nav.login"> Login</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
