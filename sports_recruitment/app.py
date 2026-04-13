@@ -167,12 +167,8 @@ def signup():
         )
         cur.close(); db.close()
 
-        try:
-            send_verification_email(email, name, token)
-            flash('Account created! Check your email to verify your account.', 'success')
-        except Exception as e:
-            app.logger.error(f'Email error: {e}')
-            flash('Account created! Email service unavailable — contact support to verify.', 'warning')
+
+            flash('Account created! Please login.', 'success')
 
         return redirect(url_for('login'))
 
