@@ -167,9 +167,7 @@ def signup():
         )
         cur.close(); db.close()
 
-
- flash('Account created! Please login.', 'success')
-
+        flash('Account created! Please login.', 'success')
         return redirect(url_for('login'))
 
     return render_template('signup.html')
