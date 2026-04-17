@@ -557,3 +557,15 @@ document.addEventListener('DOMContentLoaded', () => {
     obs.observe(el);
   });
 });
+// your other JS code above...
+
+// Loading screen
+window.addEventListener('load', function() {
+  const loader = document.getElementById('loader-wrapper');
+
+  loader.classList.add('hidden');
+
+  setTimeout(() => {
+    loader.style.display = 'none';
+  }, 800);
+});
